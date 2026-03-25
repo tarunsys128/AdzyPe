@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useInvoiceBuilder } from '../hooks/useInvoiceBuilder';
-import { ArrowLeft, Plus, Trash2, Eye, EyeOff, Zap, Building2, Calendar, Hash } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Eye, EyeOff, Zap, Building2, Calendar, Hash, Loader2 } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
 
 export default function InvoiceForm() {
@@ -22,18 +22,24 @@ export default function InvoiceForm() {
   const [customerId, setCustomerId] = useState(prefilledCustomer);
   const [dueDate, setDueDate] = useState('');
   const [invoiceNote, setInvoiceNote] = useState('');
+  const [profile, setProfile] = useState<any>(null);
+  
   const today = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
   const invoiceNumber = `INV-${Date.now().toString().slice(-5)}`;
 
   const { items, addItem, removeItem, updateItem, cashDiscount, setCashDiscount, subtotal, discountAmount, total } = useInvoiceBuilder();
 
   useEffect(() => {
-    async function fetchCustomers() {
+    async function fetchData() {
       if (!user) return;
-      const { data } = await supabase.from('customers').select('id, name, phone').eq('user_id', user.id);
-      if (data) setCustomers(data);
+      const [custRes, profRes] = await Promise.all([
+        supabase.from('customers').select('id, name, phone').eq('user_id', user.id),
+        supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
+      ]);
+      if (custRes.data) setCustomers(custRes.data);
+      if (profRes.data) setProfile(profRes.data);
     }
-    fetchCustomers();
+    fetchData();
   }, [user]);
 
   const selectedCustomer = customers.find(c => c.id === customerId);
@@ -42,7 +48,9 @@ export default function InvoiceForm() {
     e.preventDefault();
     if (!user) return;
     if (!customerId) return setError('Please select a customer.');
-    if (items.some(i => !i.name || i.price <= 0 || i.quantity <= 0)) return setError('Please fill all item details correctly.');
+    if (items.some(i => !i.name || i.price <= 0 || i.quantity <= 0)) {
+      return setError('Please fill all item details correctly.');
+    }
 
     setLoading(true);
     setError('');
@@ -55,7 +63,11 @@ export default function InvoiceForm() {
       status: 'Pending'
     }]).select().single();
 
-    if (invError) { setError(invError.message); setLoading(false); return; }
+    if (invError) { 
+      setError(invError.message); 
+      setLoading(false); 
+      return; 
+    }
 
     const itemsToInsert = items.map(item => ({
       invoice_id: invoice.id,
@@ -63,9 +75,14 @@ export default function InvoiceForm() {
       price: item.price,
       quantity: item.quantity
     }));
+    
     const { error: itemsError } = await supabase.from('invoice_items').insert(itemsToInsert);
-    if (itemsError) setError(itemsError.message);
-    else navigate(`/invoices/${invoice.id}`);
+    
+    if (itemsError) {
+      setError(itemsError.message);
+    } else {
+      navigate(`/invoices/${invoice.id}`);
+    }
     setLoading(false);
   };
 
@@ -243,9 +260,14 @@ export default function InvoiceForm() {
                         <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
                           <Zap size={14} className="text-white" />
                         </div>
-                        <span className="font-900 text-xl tracking-tight text-blue-700">BizPay Pro</span>
+                        <span className="font-900 text-xl tracking-tight text-blue-700">
+                          {profile?.business_name || 'BizPay Pro'}
+                        </span>
                       </div>
-                      <p className="text-xs font-medium text-slate-500">123 Business Park, Industrial Est.<br/>Mumbai, MH 400001</p>
+                      <p className="text-xs font-medium text-slate-500 whitespace-pre-line">
+                        {profile?.address || 'Your Business Address\nSet in Settings'}
+                        {profile?.gstin && <><br/>GST: {profile.gstin}</>}
+                      </p>
                     </div>
                     <div className="text-right">
                       <p className="text-3xl font-900 text-slate-800 tracking-tighter uppercase mb-1">Invoice</p>

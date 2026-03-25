@@ -141,6 +141,19 @@
   .text-muted     { color: rgb(var(--text-muted)); }
   .border-default { border-color: rgb(var(--border)); }
 
+  /* Overflow Protection Utilities */
+  .truncate-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .min-w-0 {
+    min-width: 0;
+  }
+
   /* Animations */
   .animate-slide-up  { animation: slideUp 0.25s ease-out; }
   @keyframes slideUp  { from { transform: translateY(12px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }

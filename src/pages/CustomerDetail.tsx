@@ -5,7 +5,7 @@ import { formatCurrency } from '../lib/utils';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/Badge';
-import { ArrowLeft, Edit2, Phone, MapPin, Mail, Hash, Wallet, Clock, Plus } from 'lucide-react';
+import { ArrowLeft, Edit2, Phone, MapPin, Mail, Hash, Wallet, Clock, Plus, Loader2, AlertTriangle } from 'lucide-react';
 
 export default function CustomerDetail() {
   const { id } = useParams();
@@ -33,8 +33,23 @@ export default function CustomerDetail() {
     fetchData();
   }, [id]);
 
-  if (loading) return <div className="p-8 text-center text-slate-500 font-bold animate-pulse">Loading Identity...</div>;
-  if (!customer) return <div className="p-8 text-center text-red-500 font-bold">Customer Not Found</div>;
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
+      <Loader2 className="w-10 h-10 animate-spin text-blue-600" />
+      <p className="text-sm font-bold text-slate-400 uppercase tracking-widest">Compiling Profile...</p>
+    </div>
+  );
+  
+  if (!customer) return (
+    <div className="flex flex-col items-center justify-center h-[70vh] gap-4">
+      <div className="w-16 h-16 rounded-2xl bg-red-50 text-red-500 flex items-center justify-center border border-red-100">
+        <AlertTriangle size={32} />
+      </div>
+      <h2 className="text-xl font-800 text-slate-800">Customer Not Found</h2>
+      <p className="text-sm font-medium text-slate-500 max-w-xs text-center">We couldn't locate this account. It may have been deleted or reset.</p>
+      <Button variant="outline" onClick={() => navigate('/customers')} className="mt-2">Back to Customers</Button>
+    </div>
+  );
 
   const totalInvoiced = invoices.reduce((s, i) => s + i.total_amount, 0);
   const totalPaid = payments.reduce((s, p) => s + p.amount, 0);

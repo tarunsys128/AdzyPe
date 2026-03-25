@@ -76,8 +76,9 @@ export function TopBar() {
               <div className="w-7 h-7 rounded-lg gradient-blue flex items-center justify-center">
                 <User size={14} className="text-white" />
               </div>
-              <span className="text-sm font-semibold text-slate-700 hidden sm:block">Admin</span>
-              <ChevronDown size={13} className="text-slate-400" />
+              <span className="text-sm font-semibold text-slate-700 hidden sm:block truncate max-w-[120px]">Admin</span>
+              <ChevronDown size={13} className="text-slate-400 flex-shrink-0" />
+
             </button>
             {showUser && (
               <div className="absolute right-0 top-11 w-52 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-slide-up">
