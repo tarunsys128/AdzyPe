@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
@@ -11,6 +11,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const navigate = useNavigate();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +27,8 @@ export default function Login() {
       toast.error(msg);
       setLoading(false);
     } else {
-      toast.success('Welcome back! Signing you in...');
-      // AuthContext onAuthStateChange will detect the new session and ProtectedRoute redirects automatically
+      toast.success('Welcome back!');
+      navigate('/');
     }
   };
 
