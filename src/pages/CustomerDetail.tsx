@@ -19,6 +19,14 @@ export default function CustomerDetail() {
     async function fetchData() {
       if (!id) return;
       
+      // Validate UUID format to prevent Supabase errors with legacy mock IDs (e.g. 'admin-123')
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+      if (!uuidRegex.test(id)) {
+        setCustomer(null);
+        setLoading(false);
+        return;
+      }
+      
       const { data: custData } = await supabase.from('customers').select('*').eq('id', id).single();
       if (custData) setCustomer(custData);
       
