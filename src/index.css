@@ -57,21 +57,9 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
-    /* Prevent text from overflowing containers on mobile */
     overflow-x: hidden;
-    word-break: break-word;
-    overflow-wrap: break-word;
   }
-  /* Cards and stat cards: always clip content, never overflow */
-  .card, [class*="rounded"] {
-    overflow: hidden;
-  }
-  /* Any heading / number in a flex box won't overflow */
-  h1, h2, h3, p, span {
-    max-width: 100%;
-    word-break: break-word;
-    overflow-wrap: break-word;
-  }
+
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
   ::-webkit-scrollbar-track { background: transparent; }
