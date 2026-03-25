@@ -1,21 +1,24 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
-import { MessageCircle, AlertTriangle, Clock, Send, Users, Search } from 'lucide-react';
+import { MessageCircle, AlertTriangle, Clock, Send, Users, Search, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { useAuth } from '../contexts/AuthContext';
 import toast from 'react-hot-toast';
 
-const ledgerData = [
-  { id: 1, name: 'Mehta & Sons',        phone: '9876543210', totalDue: 28500,  overdueDays: 15, lastContact: '2026-03-10', invoices: 3 },
-  { id: 2, name: 'Ravi Traders',        phone: '9812345678', totalDue: 14200,  overdueDays: 32, lastContact: '2026-02-25', invoices: 2 },
-  { id: 3, name: 'Kumar Distributors',  phone: '9901234567', totalDue: 52000,  overdueDays: 0,  lastContact: '2026-03-20', invoices: 5 },
-  { id: 4, name: 'ShreeRam Stores',     phone: '9823456789', totalDue: 8900,   overdueDays: 47, lastContact: '2026-02-10', invoices: 1 },
-  { id: 5, name: 'Patel & Co.',         phone: '9834567890', totalDue: 35600,  overdueDays: 8,  lastContact: '2026-03-15', invoices: 4 },
-  { id: 6, name: 'Gupta Enterprises',   phone: '9845678901', totalDue: 19800,  overdueDays: 0,  lastContact: '2026-03-22', invoices: 2 },
-];
+interface CustomerLedger {
+  id: string;
+  name: string;
+  phone: string;
+  totalDue: number;
+  overdueDays: number;
+  lastContact: string;
+  invoiceCount: number;
+}
 
-function buildWhatsAppMessage(customer: typeof ledgerData[0]) {
+function buildWhatsAppMessage(customer: CustomerLedger, businessName: string) {
   return encodeURIComponent(
-    `Hello ${customer.name},\n\nThis is a friendly reminder from your distributor.\n\n` +
+    `Hello ${customer.name},\n\nThis is a friendly reminder from ${businessName}.\n\n` +
     `💰 Outstanding Amount: ₹${customer.totalDue.toLocaleString('en-IN')}\n` +
     `📅 Due: ${customer.overdueDays > 0 ? `${customer.overdueDays} days overdue` : 'On time'}\n\n` +
     `Please clear your dues at the earliest to avoid late charges.\n\n` +
@@ -24,24 +27,99 @@ function buildWhatsAppMessage(customer: typeof ledgerData[0]) {
 }
 
 export default function Reminders() {
+  const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
+  const [ledgerData, setLedgerData] = useState<CustomerLedger[]>([]);
+  const [businessName, setBusinessName] = useState('Your Distributor');
   const [search, setSearch] = useState('');
   const [filter, setFilter] = useState<'all' | 'overdue'>('all');
-  const [sentTo, setSentTo] = useState<Set<number>>(new Set());
+  const [sentTo, setSentTo] = useState<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (user) fetchData();
+  }, [user]);
+
+  async function fetchData() {
+    setLoading(true);
+    try {
+      // Fetch business profile name
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('business_name')
+        .eq('id', user!.id)
+        .maybeSingle();
+      if (profile?.business_name) setBusinessName(profile.business_name);
+
+      // Fetch customers with their invoices
+      const { data: customers, error } = await supabase
+        .from('customers')
+        .select('id, name, phone, invoices(total_amount, status, created_at, due_date)')
+        .eq('user_id', user!.id)
+        .order('name');
+
+      if (error) throw error;
+
+      const now = new Date();
+      const ledger: CustomerLedger[] = (customers || []).map(c => {
+        const invoices: any[] = c.invoices || [];
+        const unpaidInvoices = invoices.filter(inv => inv.status !== 'Paid');
+        const totalDue = unpaidInvoices.reduce((sum: number, inv: any) => sum + Number(inv.total_amount), 0);
+
+        // Overdue: find oldest unpaid invoice
+        let overdueDays = 0;
+        const lastInvoiceDate = invoices.length > 0 ? invoices[invoices.length - 1].created_at : null;
+        const oldestUnpaid = unpaidInvoices.sort((a, b) =>
+          new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+        )[0];
+        if (oldestUnpaid) {
+          const dueDate = oldestUnpaid.due_date
+            ? new Date(oldestUnpaid.due_date)
+            : new Date(new Date(oldestUnpaid.created_at).getTime() + 30 * 24 * 60 * 60 * 1000);
+          if (now > dueDate) {
+            overdueDays = Math.floor((now.getTime() - dueDate.getTime()) / (1000 * 3600 * 24));
+          }
+        }
+
+        return {
+          id: c.id,
+          name: c.name,
+          phone: c.phone || '',
+          totalDue,
+          overdueDays,
+          lastContact: lastInvoiceDate || new Date().toISOString(),
+          invoiceCount: invoices.length,
+        };
+      }).filter(c => c.totalDue > 0 || c.invoiceCount > 0); // Show customers who have invoices
+
+      setLedgerData(ledger);
+    } catch (err: any) {
+      toast.error('Failed to load customer data');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const filtered = ledgerData.filter(c => {
-    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase());
+    const matchSearch = c.name.toLowerCase().includes(search.toLowerCase()) ||
+      c.phone.includes(search);
     const matchFilter = filter === 'all' || c.overdueDays > 0;
     return matchSearch && matchFilter;
   });
 
-  const sendReminder = (customer: typeof ledgerData[0]) => {
-    const msg = buildWhatsAppMessage(customer);
-    // Real WhatsApp link working behavior:
+  const sendReminder = (customer: CustomerLedger) => {
+    if (!customer.phone) {
+      toast.error(`No phone number for ${customer.name}`);
+      return;
+    }
+    const msg = buildWhatsAppMessage(customer, businessName);
+    const cleanPhone = customer.phone.replace(/\D/g, '');
+    const phoneWithCode = cleanPhone.startsWith('91') ? cleanPhone : `91${cleanPhone}`;
     try {
-      window.open(`https://wa.me/91${customer.phone}?text=${msg}`, '_blank', 'noopener,noreferrer');
+      window.open(`https://wa.me/${phoneWithCode}?text=${msg}`, '_blank', 'noopener,noreferrer');
       setSentTo(prev => new Set(prev).add(customer.id));
       toast.success(`Reminder sent to ${customer.name}`);
-    } catch (err) {
+    } catch {
       toast.error('Failed to open WhatsApp');
     }
   };
@@ -49,54 +127,62 @@ export default function Reminders() {
   const sendBulkReminder = () => {
     const overdueCustomers = filtered.filter(c => c.overdueDays > 0);
     if (overdueCustomers.length === 0) {
-      toast.error('No overdue customers found to remind.');
+      toast.error('No overdue customers to remind.');
       return;
     }
-    
     toast.loading(`Sending ${overdueCustomers.length} reminders...`, { duration: 2000 });
-    
     overdueCustomers.forEach((c, i) => {
-      setTimeout(() => {
-        sendReminder(c);
-      }, i * 1500); // 1.5s delay to prevent pop-up blocking issues
+      setTimeout(() => sendReminder(c), i * 1500);
     });
   };
 
-  const totalOverdue = ledgerData.filter(c => c.overdueDays > 0).reduce((sum, c) => sum + c.totalDue, 0);
+  const totalOutstanding = ledgerData.reduce((s, c) => s + c.totalDue, 0);
+  const totalOverdue = ledgerData.filter(c => c.overdueDays > 0).reduce((s, c) => s + c.totalDue, 0);
+
+  if (loading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+      </div>
+    );
+  }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-800 text-slate-800">Automated Reminders</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Customer Ledger & WhatsApp Collection CRM</p>
+    <div className="space-y-4 md:space-y-6 animate-fade-in pb-10">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-xl md:text-2xl font-800 text-slate-800 truncate">Automated Reminders</h1>
+          <p className="text-sm font-medium text-slate-500 mt-0.5">Customer Ledger & WhatsApp Collection CRM</p>
         </div>
         <Button
-          leftIcon={<Send size={18} />}
+          leftIcon={<Send size={16} />}
           variant="success"
-          size="lg"
+          size="sm"
           onClick={sendBulkReminder}
+          className="shrink-0 text-sm"
         >
-          Send Bulk Overdue Reminders
+          Send Bulk Reminders
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      {/* Stats */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4">
         {[
-          { label: 'Total Outstanding', value: `₹${ledgerData.reduce((s, c) => s + c.totalDue, 0).toLocaleString('en-IN')}`, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
+          { label: 'Total Outstanding', value: `₹${totalOutstanding.toLocaleString('en-IN')}`, icon: Clock, color: 'text-blue-600', bg: 'bg-blue-50 border-blue-100' },
           { label: 'Overdue Amount', value: `₹${totalOverdue.toLocaleString('en-IN')}`, icon: AlertTriangle, color: 'text-red-600', bg: 'bg-red-50 border-red-100' },
           { label: 'Customers Tracked', value: String(ledgerData.length), icon: Users, color: 'text-emerald-600', bg: 'bg-emerald-50 border-emerald-100' },
         ].map(s => {
           const Icon = s.icon;
           return (
             <Card key={s.label}>
-              <CardContent className="p-5 flex items-center gap-4">
-                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 border ${s.bg}`}>
-                  <Icon size={24} className={s.color} strokeWidth={2.5} />
+              <CardContent className="p-4 flex items-center gap-3">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center flex-shrink-0 border ${s.bg}`}>
+                  <Icon size={22} className={s.color} strokeWidth={2.5} />
                 </div>
-                <div>
-                  <p className="text-[11px] font-bold text-slate-500 uppercase tracking-widest">{s.label}</p>
-                  <p className={`text-2xl font-900 tracking-tight mt-0.5 ${s.color}`}>{s.value}</p>
+                <div className="min-w-0">
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{s.label}</p>
+                  <p className={`text-lg md:text-xl font-900 tracking-tight mt-0.5 ${s.color} truncate`}>{s.value}</p>
                 </div>
               </CardContent>
             </Card>
@@ -104,14 +190,15 @@ export default function Reminders() {
         })}
       </div>
 
+      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 max-w-full sm:max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            placeholder="Search customers..."
-            className="w-full h-11 bg-white border border-slate-200 rounded-xl pl-9 pr-4 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 shadow-sm"
+            placeholder="Search by name or phone..."
+            className="w-full h-10 bg-white border border-slate-200 rounded-xl pl-9 pr-4 text-sm font-medium text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 shadow-sm"
           />
         </div>
         <div className="flex gap-2 bg-slate-100 p-1 rounded-xl border border-slate-200 w-fit">
@@ -119,9 +206,7 @@ export default function Reminders() {
             <button
               key={f}
               onClick={() => setFilter(f)}
-              className={`px-5 py-2 rounded-lg text-xs font-bold transition-all capitalize ${
-                filter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'
-              }`}
+              className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all capitalize ${filter === f ? 'bg-white text-blue-600 shadow-sm' : 'text-slate-500 hover:text-slate-700'}`}
             >
               {f === 'all' ? 'All Customers' : 'Overdue Only'}
             </button>
@@ -129,103 +214,104 @@ export default function Reminders() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-        
-        <Card className="lg:col-span-3">
-          <CardHeader className="border-b border-slate-100 bg-slate-50/50 pb-4">
-            <CardTitle>Customer Ledger Action Board</CardTitle>
+      {/* Main Content */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-4 md:gap-6 items-start">
+
+        {/* Table */}
+        <Card className="lg:col-span-3 overflow-hidden">
+          <CardHeader className="border-b border-slate-100 bg-slate-50/50 py-3 px-4 md:px-5">
+            <CardTitle className="text-sm md:text-base">Customer Ledger Action Board</CardTitle>
           </CardHeader>
           <CardContent className="p-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm text-left">
-                <thead className="bg-slate-50 border-b border-slate-200">
-                  <tr>
-                    {['Customer', 'Total Due', 'Status', 'Invs', 'Last Contact', 'Action'].map(h => (
-                      <th key={h} className="py-3.5 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100">
-                  {filtered.map((customer, i) => (
-                    <tr key={customer.id} className={`hover:bg-slate-50 transition-colors ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
-                      <td className="py-4 px-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-sm font-800 text-blue-600 flex-shrink-0">
-                            {customer.name[0]}
-                          </div>
-                          <div>
-                            <p className="text-sm font-bold text-slate-800">{customer.name}</p>
-                            <p className="text-xs font-semibold text-slate-500 mt-0.5">📞 {customer.phone}</p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="py-4 px-4">
-                        <p className="text-sm font-900 text-slate-800">₹{customer.totalDue.toLocaleString('en-IN')}</p>
-                      </td>
-                      <td className="py-4 px-4">
-                        {customer.overdueDays > 0 ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm">
-                            <AlertTriangle size={12} strokeWidth={3} />
-                            {customer.overdueDays}d overdue
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2.5 py-1 rounded-full whitespace-nowrap shadow-sm">
-                            <Clock size={12} strokeWidth={3} />
-                            On Time
-                          </span>
-                        )}
-                      </td>
-                      <td className="py-4 px-4 text-slate-600 font-bold">{customer.invoices}</td>
-                      <td className="py-4 px-4 text-slate-500 font-semibold text-xs whitespace-nowrap">
-                        {new Date(customer.lastContact).toLocaleDateString('en-IN', { day: '2-digit', month: 'short' })}
-                      </td>
-                      <td className="py-4 px-4">
-                        <Button
-                          size="sm"
-                          variant={sentTo.has(customer.id) ? 'secondary' : 'success'}
-                          leftIcon={<MessageCircle size={16} strokeWidth={2.5} />}
-                          onClick={() => sendReminder(customer)}
-                          className={`shadow-sm w-32 ${sentTo.has(customer.id) ? 'bg-slate-100 text-slate-600 hover:bg-slate-200' : 'bg-[#25D366] hover:bg-[#128C7E] text-white border-transparent'}`}
-                        >
-                          {sentTo.has(customer.id) ? 'Sent ✓' : 'WhatsApp'}
-                        </Button>
-                      </td>
+            {ledgerData.length === 0 ? (
+              <div className="py-16 text-center">
+                <Users size={44} className="mx-auto text-slate-200 mb-3" />
+                <p className="text-sm font-bold text-slate-400">No customers with invoices yet</p>
+                <p className="text-xs text-slate-400 mt-1">Add customers and create invoices to see them here</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm text-left min-w-[560px]">
+                  <thead className="bg-slate-50 border-b border-slate-200">
+                    <tr>
+                      {['Customer', 'Total Due', 'Status', 'Invs', 'Action'].map(h => (
+                        <th key={h} className="py-3 px-3 md:px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest whitespace-nowrap">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                  {filtered.length === 0 && (
-                     <tr><td colSpan={6} className="py-12 text-center text-slate-500 font-semibold">No customers found matching criteria.</td></tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {filtered.map((customer, i) => (
+                      <tr key={customer.id} className={`hover:bg-slate-50 transition-colors ${i % 2 === 0 ? 'bg-white' : 'bg-slate-50/30'}`}>
+                        <td className="py-3 px-3 md:px-4">
+                          <div className="flex items-center gap-2 md:gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-sm font-800 text-blue-600 flex-shrink-0">
+                              {customer.name[0]}
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-sm font-bold text-slate-800 truncate max-w-[120px] md:max-w-none">{customer.name}</p>
+                              {customer.phone && <p className="text-xs text-slate-500 mt-0.5">📞 {customer.phone}</p>}
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-3 md:px-4 whitespace-nowrap">
+                          <p className="text-sm font-900 text-slate-800">₹{customer.totalDue.toLocaleString('en-IN')}</p>
+                        </td>
+                        <td className="py-3 px-3 md:px-4">
+                          {customer.overdueDays > 0 ? (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-red-600 bg-red-50 border border-red-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              <AlertTriangle size={11} strokeWidth={3} />
+                              {customer.overdueDays}d overdue
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-0.5 rounded-full whitespace-nowrap">
+                              <Clock size={11} strokeWidth={3} />
+                              On Time
+                            </span>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 md:px-4 text-slate-600 font-bold">{customer.invoiceCount}</td>
+                        <td className="py-3 px-3 md:px-4">
+                          <Button
+                            size="sm"
+                            variant={sentTo.has(customer.id) ? 'secondary' : 'success'}
+                            leftIcon={<MessageCircle size={14} strokeWidth={2.5} />}
+                            onClick={() => sendReminder(customer)}
+                            className={`text-xs ${sentTo.has(customer.id) ? 'bg-slate-100 text-slate-600' : 'bg-[#25D366] hover:bg-[#128C7E] text-white border-transparent'}`}
+                          >
+                            {sentTo.has(customer.id) ? 'Sent ✓' : 'WhatsApp'}
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                    {filtered.length === 0 && (
+                      <tr><td colSpan={5} className="py-10 text-center text-slate-400 font-semibold text-sm">No customers match your search.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
 
         {/* WhatsApp Preview Sidebar */}
         <Card className="lg:col-span-1 border-emerald-200 shadow-md">
-          <CardHeader className="bg-[#25D366]/5 border-b border-emerald-100 pb-3">
+          <CardHeader className="bg-[#25D366]/5 border-b border-emerald-100 py-3 px-4">
             <CardTitle className="text-sm text-[#128C7E] flex items-center gap-2">
-              <MessageCircle size={16} className="fill-current" /> Auto-Message Preview
+              <MessageCircle size={15} className="fill-current" /> Auto-Message Preview
             </CardTitle>
           </CardHeader>
-          <CardContent className="pt-4 bg-slate-50/50">
+          <CardContent className="p-4 bg-slate-50/50">
             <div className="bg-[#DCF8C6] border border-[#25D366]/30 rounded-2xl rounded-tr-none p-4 text-[13px] text-slate-800 leading-relaxed shadow-sm relative">
-              <span className="font-bold">Hello [Customer Name],</span><br/><br/>
-              This is a friendly reminder from your distributor.<br/><br/>
-              <span className="font-bold">💰 Outstanding Amount: <span className="text-red-600">₹[Amount]</span></span><br/>
-              <span className="font-bold">📅 Due: <span className="text-red-600">[Overdue Status]</span></span><br/><br/>
-              Please clear your dues at the earliest to avoid late charges.<br/><br/>
-              For queries, contact us. Thank you! 🙏<br/><br/>
-              <span className="text-[10px] text-emerald-700 italic font-medium opacity-80 mt-2 block border-t border-emerald-600/20 pt-1">
-                Sent automatically via BizPay Pro.
-              </span>
-
-              {/* Chat tail styling */}
+              <span className="font-bold">Hello [Customer Name],</span><br /><br />
+              This is a friendly reminder from <span className="font-bold">{businessName}</span>.<br /><br />
+              <span className="font-bold">💰 Outstanding: <span className="text-red-600">₹[Amount]</span></span><br />
+              <span className="font-bold">📅 Due: <span className="text-red-600">[Overdue Status]</span></span><br /><br />
+              Please clear your dues to avoid late charges.<br /><br />
+              For queries, contact us. Thank you! 🙏
               <div className="absolute top-0 -right-2 w-0 h-0 border-l-[10px] border-l-[#DCF8C6] border-t-[10px] border-t-transparent" />
             </div>
-            
-            <p className="text-[11px] font-semibold text-slate-500 mt-4 bg-white p-3 rounded-xl border border-slate-200 text-center">
-              Variables in brackets are auto-filled dynamically when you click Send via WhatsApp.
+            <p className="text-[11px] font-semibold text-slate-500 mt-3 bg-white p-3 rounded-xl border border-slate-200 text-center">
+              Brackets are auto-filled when you click Send via WhatsApp.
             </p>
           </CardContent>
         </Card>

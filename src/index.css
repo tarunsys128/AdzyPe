@@ -44,9 +44,12 @@
 @layer base {
   * {
     box-sizing: border-box;
+    min-width: 0;
   }
   html {
     color-scheme: light;
+    /* Prevent horizontal scroll on mobile */
+    overflow-x: hidden;
   }
   body {
     background-color: rgb(var(--bg));
@@ -54,6 +57,20 @@
     font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
+    /* Prevent text from overflowing containers on mobile */
+    overflow-x: hidden;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+  /* Cards and stat cards: always clip content, never overflow */
+  .card, [class*="rounded"] {
+    overflow: hidden;
+  }
+  /* Any heading / number in a flex box won't overflow */
+  h1, h2, h3, p, span {
+    max-width: 100%;
+    word-break: break-word;
+    overflow-wrap: break-word;
   }
 
   ::-webkit-scrollbar { width: 4px; height: 4px; }
@@ -150,8 +167,15 @@
     overflow: hidden;
   }
 
-  .min-w-0 {
-    min-width: 0;
+  /* Scrollable table wrapper for mobile */
+  .table-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Numeric values - never break in the middle */
+  .no-break {
+    white-space: nowrap;
   }
 
   /* Animations */
