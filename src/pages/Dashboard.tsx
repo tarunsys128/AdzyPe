@@ -178,7 +178,7 @@ export default function Dashboard() {
                 <RadialBar background={{ fill: '#F1F5F9' }} dataKey="value" cornerRadius={12} fill={stats.efficiency > 70 ? '#10B981' : '#F59E0B'} />
               </RadialBarChart>
             </ResponsiveContainer>
-            <div className="absolute top-[45%] text-center">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-center">
               <span className="text-4xl font-900 text-slate-800 tracking-tighter">{stats.efficiency}%</span>
               <p className={`text-sm font-bold mt-1 ${stats.efficiency > 70 ? 'text-emerald-600' : 'text-amber-600'}`}>
                 {stats.efficiency > 70 ? 'Optimal' : 'Needs Work'}

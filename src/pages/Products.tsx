@@ -150,7 +150,7 @@ export default function Products() {
                 </div>
               )}
 
-              <div className="flex items-start gap-3 mb-4">
+              <div className="flex items-center gap-3 mb-4">
                 <div className="w-12 h-12 rounded-2xl bg-slate-50 border border-slate-100 flex items-center justify-center flex-shrink-0">
                   <Package size={20} className="text-slate-400" />
                 </div>
@@ -161,13 +161,13 @@ export default function Products() {
               </div>
 
               <div className="grid grid-cols-2 gap-2 mb-4">
-                <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Price</p>
-                  <p className="text-sm font-800 text-slate-800">₹{product.price}</p>
+                <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 min-h-[52px] flex flex-col justify-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 leading-none">Price</p>
+                  <p className="text-sm font-800 text-slate-800 leading-none">₹{product.price}</p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Stock</p>
-                  <p className={`text-sm font-800 ${product.stock === 0 ? 'text-red-500' : product.stock <= 5 ? 'text-amber-500' : 'text-slate-800'}`}>
+                <div className="bg-slate-50 rounded-xl p-2.5 border border-slate-100 min-h-[52px] flex flex-col justify-center">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5 leading-none">Stock</p>
+                  <p className={`text-sm font-800 leading-none ${product.stock === 0 ? 'text-red-500' : product.stock <= 5 ? 'text-amber-500' : 'text-slate-800'}`}>
                     {product.stock} <span className="text-xs font-semibold text-slate-500 font-normal">units</span>
                   </p>
                 </div>

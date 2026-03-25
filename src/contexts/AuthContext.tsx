@@ -41,8 +41,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const initSession = async () => {
       try {
         const { data: { session } } = await supabase.auth.getSession();
-        setSession(session);
-        setUser(session?.user ?? null);
+        if (session) {
+          localStorage.removeItem('admin_bypass');
+          setSession(session);
+          setUser(session.user);
+        }
       } catch (err) {
         console.error('Supabase session fetch failed:', err);
       } finally {
@@ -56,6 +59,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     
     try {
       const response = supabase.auth.onAuthStateChange((_event, session) => {
+        if (session) localStorage.removeItem('admin_bypass');
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);

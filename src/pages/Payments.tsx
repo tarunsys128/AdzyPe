@@ -60,7 +60,7 @@ export default function Payments() {
         {filtered.map(payment => (
           <Card key={payment.id} className="hover:-translate-y-1 hover:shadow-lg transition-all">
             <CardContent className="p-5">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-center mb-4">
                 <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 shadow-sm">
                   <Wallet size={18} strokeWidth={2.5} />
                 </div>

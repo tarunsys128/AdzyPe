@@ -65,7 +65,7 @@ export default function Invoices() {
             onClick={() => navigate(`/invoices/${invoice.id}`)}
           >
             <CardContent className="p-5">
-              <div className="flex justify-between items-start mb-4">
+              <div className="flex justify-between items-center mb-4">
                 <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
                   <FileText size={18} strokeWidth={2.5} />
                 </div>

@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, Bell, ChevronDown, User, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
+import { useAuth } from '../../contexts/AuthContext';
 
 const alerts = [
   { id: 1, text: 'Invoice #105 is overdue by 3 days',  dot: 'bg-red-500' },
@@ -10,14 +11,26 @@ const alerts = [
 ];
 
 export function TopBar() {
+  const { user } = useAuth();
   const [showNotifs, setShowNotifs] = useState(false);
   const [showUser, setShowUser] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    async function fetchProfile() {
+      if (!user) return;
+      const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+      if (data) setProfile(data);
+    }
+    fetchProfile();
+  }, [user]);
 
   const close = () => { setShowNotifs(false); setShowUser(false); };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
+    localStorage.removeItem('admin_bypass');
     navigate('/login');
   };
 
@@ -30,13 +43,13 @@ export function TopBar() {
 
       <header className="h-16 flex items-center gap-4 px-4 md:px-6 bg-white border-b border-slate-200 z-50 flex-shrink-0 shadow-sm">
         {/* Search */}
-        <div className="flex-1 max-w-md">
+        <div className="flex-1 max-w-md hidden md:block">
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
               placeholder="Search invoices, customers..."
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-all"
+              className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-4 py-2 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-4 focus:ring-blue-500/10 focus:border-blue-500 transition-all font-medium"
             />
           </div>
         </div>
@@ -46,52 +59,73 @@ export function TopBar() {
           <div className="relative z-50">
             <button
               onClick={() => { setShowNotifs(!showNotifs); setShowUser(false); }}
-              className="relative w-9 h-9 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all"
+              className="relative w-10 h-10 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition-all group"
             >
-              <Bell size={17} />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full ring-1 ring-white" />
+              <Bell size={18} className="group-hover:rotate-12 transition-transform" />
+              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full ring-2 ring-white" />
             </button>
             {showNotifs && (
-              <div className="absolute right-0 top-11 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-slide-up">
-                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
-                  <p className="text-sm font-semibold text-slate-800">Notifications</p>
-                  <button onClick={close}><X size={15} className="text-slate-400" /></button>
+              <div className="absolute right-0 top-12 w-80 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-slide-up">
+                <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                  <p className="text-sm font-bold text-slate-800">Recent Alerts</p>
+                  <button onClick={close} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={15} /></button>
                 </div>
-                {alerts.map(a => (
-                  <div key={a.id} className="px-4 py-3 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 flex items-start gap-2.5">
-                    <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${a.dot}`} />
-                    <p className="text-xs text-slate-600">{a.text}</p>
-                  </div>
-                ))}
+                <div className="max-h-[400px] overflow-y-auto">
+                  {alerts.map(a => (
+                    <div key={a.id} className="px-5 py-3.5 hover:bg-slate-50 cursor-pointer border-b border-slate-50 last:border-0 flex items-start gap-3 transition-colors">
+                      <span className={`mt-1.5 w-2 h-2 rounded-full flex-shrink-0 ${a.dot}`} />
+                      <p className="text-xs font-semibold text-slate-600 leading-relaxed">{a.text}</p>
+                    </div>
+                  ))}
+                </div>
+                <div className="p-3 bg-slate-50/50 border-t border-slate-100 text-center">
+                  <button className="text-xs font-bold text-blue-600 hover:text-blue-700">Clear all notifications</button>
+                </div>
               </div>
             )}
           </div>
 
-          {/* User */}
+          {/* User Profile */}
           <div className="relative z-50">
             <button
               onClick={() => { setShowUser(!showUser); setShowNotifs(false); }}
-              className="flex items-center gap-2 pl-2 pr-3 py-1.5 rounded-xl bg-slate-50 border border-slate-200 hover:bg-slate-100 transition-all"
+              className="flex items-center gap-2.5 p-1.5 pr-3 rounded-xl bg-slate-50 border border-slate-200 hover:bg-white hover:border-slate-300 hover:shadow-sm transition-all group"
             >
-              <div className="w-7 h-7 rounded-lg gradient-blue flex items-center justify-center">
-                <User size={14} className="text-white" />
+              <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
+                <User size={16} className="text-white" />
               </div>
-              <span className="text-sm font-semibold text-slate-700 hidden sm:block truncate max-w-[120px]">Admin</span>
-              <ChevronDown size={13} className="text-slate-400 flex-shrink-0" />
-
+              <div className="text-left hidden sm:block">
+                <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
+                  {profile?.business_name || 'Business User'}
+                </p>
+                <div className="flex items-center gap-1">
+                  <span className="text-xs font-bold text-slate-800 truncate max-w-[100px]">
+                    {user?.email?.split('@')[0] || 'Admin'}
+                  </span>
+                  <ChevronDown size={12} className={`text-slate-400 transition-transform ${showUser ? 'rotate-180' : ''}`} />
+                </div>
+              </div>
             </button>
             {showUser && (
-              <div className="absolute right-0 top-11 w-52 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50 animate-slide-up">
-                <div className="px-4 py-3 border-b border-slate-100">
-                  <p className="text-sm font-semibold text-slate-800">Admin User</p>
-                  <p className="text-xs text-slate-500">admin@bizpay.in</p>
+              <div className="absolute right-0 top-12 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden z-50 animate-slide-up">
+                <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/50">
+                  <p className="text-sm font-bold text-slate-800">{profile?.business_name || 'My Business'}</p>
+                  <p className="text-[11px] font-semibold text-slate-500 mt-1 truncate">{user?.email}</p>
                 </div>
-                <button
-                  onClick={handleSignOut}
-                  className="w-full text-left px-4 py-3 text-sm text-red-600 hover:bg-red-50 transition-all font-medium"
-                >
-                  Sign Out
-                </button>
+                <div className="p-2">
+                  <button
+                    onClick={() => { close(); navigate('/settings'); }}
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-slate-600 hover:bg-slate-50 hover:text-blue-600 rounded-lg transition-all flex items-center gap-2"
+                  >
+                    <User size={14} /> Profile Settings
+                  </button>
+                  <button
+                    onClick={handleSignOut}
+                    className="w-full text-left px-4 py-2.5 text-xs font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all flex items-center gap-2 mt-1"
+                  >
+                    <X size={14} /> Sign Out Account
+                  </button>
+                </div>
               </div>
             )}
           </div>

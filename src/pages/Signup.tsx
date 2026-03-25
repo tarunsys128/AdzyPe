@@ -19,6 +19,7 @@ export default function Signup() {
     setLoading(true);
     setError('');
 
+    localStorage.removeItem('admin_bypass');
     const { error } = await supabase.auth.signUp({
       email,
       password,

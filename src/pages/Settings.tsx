@@ -27,16 +27,18 @@ export default function Settings() {
     if (!user) return;
     setLoading(true);
     // Try to get existing profile
-    const { data, error } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle();
     
     if (data) {
       setProfile({
         business_name: data.business_name || '',
-        email: data.email || '',
+        email: data.email || user.email || '',
         phone: data.phone || '',
         gstin: data.gstin || '',
         address: data.address || ''
       });
+    } else {
+      setProfile(prev => ({ ...prev, email: user.email || '' }));
     }
     setLoading(false);
   }

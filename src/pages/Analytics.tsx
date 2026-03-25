@@ -75,18 +75,18 @@ export default function Analytics() {
 
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
-          { label: 'Total Revenue', value: '₹4.60L', change: '+18.2%', up: true, color: 'text-blue-600', icon: 'bg-blue-50 text-blue-600' },
-          { label: 'Total Expenses', value: '₹1.69L', change: '+6.1%', up: false, color: 'text-violet-600', icon: 'bg-violet-50 text-violet-600' },
-          { label: 'Net Profit',    value: '₹2.91L', change: '+27.5%', up: true,  color: 'text-emerald-600', icon: 'bg-emerald-50 text-emerald-600' },
-          { label: 'Profit Margin', value: '63.2%',   change: '+5.1%', up: true,  color: 'text-amber-600', icon: 'bg-amber-50 text-amber-600' },
+          { label: 'Total Revenue', value: '₹4.60L', change: '+18.2%', up: true, color: 'text-blue-600' },
+          { label: 'Total Expenses', value: '₹1.69L', change: '+6.1%', up: false, color: 'text-violet-600' },
+          { label: 'Net Profit',    value: '₹2.91L', change: '+27.5%', up: true,  color: 'text-emerald-600' },
+          { label: 'Profit Margin', value: '63.2%',   change: '+5.1%', up: true,  color: 'text-amber-600' },
         ].map(s => (
-          <Card key={s.label}>
-            <CardContent className="p-4 sm:p-5">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">{s.label}</p>
-              <p className={`text-2xl sm:text-3xl font-800 ${s.color} tracking-tight`}>{s.value}</p>
-              <div className={`flex items-center gap-1 mt-2 text-xs font-bold ${s.up ? 'text-emerald-600' : 'text-red-500'}`}>
-                {s.up ? <TrendingUp size={14} strokeWidth={3} /> : <TrendingDown size={14} strokeWidth={3} />}
-                {s.change} <span className="text-slate-400 font-semibold ml-1">vs last period</span>
+          <Card key={s.label} className="hover:-translate-y-1 hover:shadow-lg transition-all">
+            <CardContent className="p-5 flex flex-col items-center text-center">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">{s.label}</p>
+              <p className={`text-2xl sm:text-3xl font-900 ${s.color} tracking-tighter`}>{s.value}</p>
+              <div className={`flex items-center gap-1.5 mt-3 text-[10px] font-bold px-2 py-0.5 rounded-full ${s.up ? 'bg-emerald-50 text-emerald-600 border border-emerald-100' : 'bg-red-50 text-red-500 border border-red-100'}`}>
+                {s.up ? <TrendingUp size={12} strokeWidth={3} /> : <TrendingDown size={12} strokeWidth={3} />}
+                {s.change}
               </div>
             </CardContent>
           </Card>

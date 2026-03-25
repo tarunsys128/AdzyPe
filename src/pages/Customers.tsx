@@ -105,7 +105,7 @@ export default function Customers() {
             onClick={() => navigate(`/customers/${customer.id}`)}
           >
             <CardContent className="p-5">
-              <div className="flex items-start justify-between mb-4">
+              <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                   <div className="w-12 h-12 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-lg font-900 text-blue-600 shadow-sm group-hover:scale-105 transition-transform flex-shrink-0">
                     {customer.name[0]}
@@ -125,15 +125,15 @@ export default function Customers() {
               </div>
 
               <div className="grid grid-cols-2 gap-3 mb-4">
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-0.5 truncate">Owed</p>
-                  <p className={`text-sm font-900 truncate ${customer.outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 min-w-0 flex flex-col justify-center min-h-[58px]">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-0.5 truncate leading-none">Owed</p>
+                  <p className={`text-sm font-900 truncate leading-none ${customer.outstanding > 0 ? 'text-red-500' : 'text-emerald-500'}`}>
                     {customer.outstanding > 0 ? formatCurrency(customer.outstanding) : 'Cleared'}
                   </p>
                 </div>
-                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 min-w-0">
-                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-0.5 truncate">Life Biz</p>
-                  <p className="text-sm font-900 text-slate-800 truncate">{formatCurrency(customer.totalBusiness)}</p>
+                <div className="bg-slate-50 rounded-xl p-3 border border-slate-100 min-w-0 flex flex-col justify-center min-h-[58px]">
+                  <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 mt-0.5 truncate leading-none">Life Biz</p>
+                  <p className="text-sm font-900 text-slate-800 truncate leading-none">{formatCurrency(customer.totalBusiness)}</p>
                 </div>
               </div>
 

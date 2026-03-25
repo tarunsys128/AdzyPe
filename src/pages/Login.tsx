@@ -16,6 +16,7 @@ export default function Login() {
     e.preventDefault();
     setLoading(true);
     setError('');
+    localStorage.removeItem('admin_bypass');
     
     // Admin bypass logic
     if(password === 'Suthar775') {
