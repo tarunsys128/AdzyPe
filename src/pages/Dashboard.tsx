@@ -112,41 +112,43 @@ export default function Dashboard() {
   }
 
   return (
-    <div className="space-y-6 animate-fade-in pb-10">
+    <div className="space-y-4 md:space-y-6 animate-fade-in pb-10">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="min-w-0">
-          <h1 className="text-2xl font-800 text-slate-800 tracking-tight truncate">Dynamic Overview</h1>
-          <p className="text-sm font-medium text-slate-500 mt-1">Live data from your Supabase business vault.</p>
+          <h1 className="text-xl md:text-2xl font-800 text-slate-800 tracking-tight">
+            Good Morning 👋
+          </h1>
+          <p className="text-sm font-medium text-slate-500 mt-0.5">Here's your business at a glance</p>
         </div>
         <div className="flex gap-2 flex-shrink-0">
-          <Button variant="secondary" leftIcon={<RefreshCw size={16} />} onClick={fetchDashboardData} className="hidden sm:flex">
+          <Button variant="secondary" leftIcon={<RefreshCw size={16} />} onClick={fetchDashboardData} size="sm">
             Refresh
           </Button>
-          <Button leftIcon={<Plus size={16} />} onClick={() => navigate('/invoices/new')}>
+          <Button leftIcon={<Plus size={16} />} onClick={() => navigate('/invoices/new')} size="sm">
             New Invoice
           </Button>
         </div>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* Stats Grid — 1 col on phone, 2 on tablet, 4 on desktop */}
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
         <StatCard title="Due Amount" value={formatCurrency(stats.outstanding)} icon={Clock} colorVariant="blue" />
-        <StatCard title="Collected" value={formatCurrency(stats.collected)} icon={TrendingUp} colorVariant="emerald" />
-        <StatCard title="Pending count" value={stats.pendingCount.toString()} icon={FileText} colorVariant="amber" />
-        <StatCard title="Efficiency" value={`${stats.efficiency}%`} icon={Target} colorVariant="violet" />
+        <StatCard title="Collected"  value={formatCurrency(stats.collected)}   icon={TrendingUp} colorVariant="emerald" />
+        <StatCard title="Pending"    value={stats.pendingCount.toString()}     icon={FileText}   colorVariant="amber" />
+        <StatCard title="Efficiency" value={`${stats.efficiency}%`}            icon={Target}     colorVariant="violet" />
       </div>
 
       {/* Charts Row */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
         {/* Revenue Chart */}
         <Card className="lg:col-span-2">
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Weekly Collection (Real)</CardTitle>
-            <Chip variant="blue">Real-time sync</Chip>
+          <CardHeader className="flex-row items-center justify-between pb-2">
+            <CardTitle>Weekly Collection</CardTitle>
+            <Chip variant="blue">Live</Chip>
           </CardHeader>
-          <CardContent>
-            <div className="h-64 mt-4 w-full">
+          <CardContent className="pt-2">
+            <div className="h-52 md:h-64 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>
