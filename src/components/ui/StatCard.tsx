@@ -41,22 +41,24 @@ export function StatCard({ title, value, trend, icon: Icon, colorVariant = 'blue
 
   return (
     <Card className="hover:-translate-y-0.5 hover:shadow-md transition-all duration-200">
-      <CardContent className="p-4 flex items-center gap-3">
+      <CardContent className="p-3 sm:p-4 flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-3">
         {/* Icon */}
-        <div className={`w-11 h-11 rounded-xl ${scheme.bg} border ${scheme.ring} flex items-center justify-center flex-shrink-0`}>
-          <Icon size={20} className={scheme.icon} strokeWidth={2.5} />
+        <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl ${scheme.bg} border ${scheme.ring} flex items-center justify-center flex-shrink-0`}>
+          <Icon className={`w-4 h-4 sm:w-5 sm:h-5 ${scheme.icon}`} strokeWidth={2.5} />
         </div>
 
         {/* Text */}
         <div className="flex-1 min-w-0">
-          <p className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.12em] mb-0.5 truncate">{title}</p>
-          <p className={`text-xl font-900 tracking-tight ${scheme.icon} leading-none`}>{displayValue}</p>
-          {trend !== undefined && (
-            <span className={`text-[10px] font-bold flex items-center gap-0.5 mt-1 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
-              {isPositive ? <TrendingUp size={9} strokeWidth={3} /> : <TrendingDown size={9} strokeWidth={3} />}
-              {Math.abs(trend)}%
-            </span>
-          )}
+          <p className="text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase tracking-[0.1em] mb-0.5 truncate">{title}</p>
+          <div className="flex items-baseline gap-1.5 flex-wrap">
+            <p className={`text-base sm:text-xl font-900 tracking-tight ${scheme.icon} leading-none truncate`}>{displayValue}</p>
+            {trend !== undefined && (
+              <span className={`text-[9px] sm:text-[10px] font-bold flex items-center gap-0.5 ${isPositive ? 'text-emerald-600' : 'text-red-500'}`}>
+                {isPositive ? <TrendingUp size={9} strokeWidth={3} /> : <TrendingDown size={9} strokeWidth={3} />}
+                {Math.abs(trend)}%
+              </span>
+            )}
+           </div>
         </div>
       </CardContent>
     </Card>
