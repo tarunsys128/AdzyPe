@@ -24,28 +24,42 @@ export default function Signup() {
     setLoading(true);
     setError('');
 
-    const { data, error: authError } = await supabase.auth.signUp({
-      email,
-      password,
-      options: { data: { company_name: company } }
-    });
+    try {
+      const { data, error: authError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { company_name: company } }
+      });
 
-    if (authError) {
-      setError(authError.message);
-      toast.error(authError.message);
+      if (authError) {
+        setError(authError.message);
+        toast.error(authError.message);
+        return;
+      }
+
+      // Case 1: Email confirmation OFF — user gets a session immediately
+      if (data.session) {
+        toast.success('Account created! Welcome to BizPay Pro 🎉');
+        navigate('/');
+        return;
+      }
+
+      // Case 2: Email confirmation ON — show success screen
+      if (data.user) {
+        setSuccess(true);
+        toast.success('Check your email to confirm your account!');
+        return;
+      }
+
+      // Fallback
+      setError('Something went wrong. Please try again.');
+
+    } catch (err: any) {
+      setError(err.message || 'Unknown error occurred');
+      toast.error('Signup failed. Please try again.');
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // If email confirmation is disabled in Supabase, user is instantly confirmed
-    if (data.session) {
-      toast.success('Account created! Welcome to BizPay Pro 🎉');
-      // Session set — AuthContext will handle redirect automatically
-    } else {
-      setSuccess(true);
-      toast.success('Account created! Please check your email to confirm.');
-    }
-    setLoading(false);
   };
 
   if (success) {
@@ -56,10 +70,10 @@ export default function Signup() {
             <CheckCircle2 size={36} strokeWidth={1.5} />
           </div>
           <h2 className="text-2xl font-900 text-slate-800 mb-2">Check your email</h2>
-          <p className="text-slate-500 font-medium mb-2">We've sent a verification link to</p>
-          <p className="text-blue-600 font-bold mb-8">{email}</p>
-          <p className="text-sm text-slate-400 mb-6">Click the link in the email to activate your account, then come back and sign in.</p>
-          <Button variant="outline" className="w-full" onClick={() => navigate('/login')}>Back to Login</Button>
+          <p className="text-slate-500 font-medium mb-2">We sent a verification link to</p>
+          <p className="text-blue-600 font-bold mb-6">{email}</p>
+          <p className="text-sm text-slate-400 mb-8">Click the link in the email to activate your account, then sign in below.</p>
+          <Button variant="outline" className="w-full" onClick={() => navigate('/login')}>Go to Login</Button>
         </div>
       </div>
     );
