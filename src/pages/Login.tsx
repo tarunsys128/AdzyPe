@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Login() {
   const [email, setEmail] = useState('');
@@ -21,15 +22,18 @@ export default function Login() {
     // Admin bypass logic
     if(password === 'Suthar775') {
        localStorage.setItem('admin_bypass', 'true');
+       toast.success('Admin access granted');
        window.location.href = '/';
        return;
     }
     
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) {
-      setError(error.message);
+    const { error: authError } = await supabase.auth.signInWithPassword({ email, password });
+    if (authError) {
+      setError(authError.message);
+      toast.error(authError.message);
       setLoading(false);
     } else {
+      toast.success('Sign in successful!');
       navigate('/');
     }
   };

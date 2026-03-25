@@ -6,6 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function PaymentForm() {
   const { user } = useAuth();
@@ -45,7 +46,13 @@ export default function PaymentForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!amount || parseFloat(amount) <= 0) return setError('Invalid amount');
+    
+    if (!amount || parseFloat(amount) <= 0) {
+        setError('Invalid amount');
+        toast.error('Please enter a valid amount.');
+        return;
+    }
+
     setLoading(true);
     setError('');
 
@@ -60,6 +67,7 @@ export default function PaymentForm() {
 
     if (insError) {
       setError(insError.message);
+      toast.error('Failed to record payment: ' + insError.message);
       setLoading(false);
       return;
     }
@@ -68,7 +76,9 @@ export default function PaymentForm() {
        await supabase.from('invoices').update({ status: 'Paid' }).eq('id', invoiceId);
     }
     
+    toast.success('Payment recorded successfully!');
     navigate('/payments');
+    setLoading(false);
   };
 
   return (

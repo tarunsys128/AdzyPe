@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { MessageCircle, AlertTriangle, Clock, Send, Users, Search } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const ledgerData = [
   { id: 1, name: 'Mehta & Sons',        phone: '9876543210', totalDue: 28500,  overdueDays: 15, lastContact: '2026-03-10', invoices: 3 },
@@ -36,16 +37,28 @@ export default function Reminders() {
   const sendReminder = (customer: typeof ledgerData[0]) => {
     const msg = buildWhatsAppMessage(customer);
     // Real WhatsApp link working behavior:
-    window.open(`https://wa.me/91${customer.phone}?text=${msg}`, '_blank', 'noopener,noreferrer');
-    setSentTo(prev => new Set(prev).add(customer.id));
+    try {
+      window.open(`https://wa.me/91${customer.phone}?text=${msg}`, '_blank', 'noopener,noreferrer');
+      setSentTo(prev => new Set(prev).add(customer.id));
+      toast.success(`Reminder sent to ${customer.name}`);
+    } catch (err) {
+      toast.error('Failed to open WhatsApp');
+    }
   };
 
   const sendBulkReminder = () => {
     const overdueCustomers = filtered.filter(c => c.overdueDays > 0);
+    if (overdueCustomers.length === 0) {
+      toast.error('No overdue customers found to remind.');
+      return;
+    }
+    
+    toast.loading(`Sending ${overdueCustomers.length} reminders...`, { duration: 2000 });
+    
     overdueCustomers.forEach((c, i) => {
       setTimeout(() => {
         sendReminder(c);
-      }, i * 800); // 800ms delay to prevent pop-up blocking issues
+      }, i * 1500); // 1.5s delay to prevent pop-up blocking issues
     });
   };
 

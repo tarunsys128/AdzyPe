@@ -4,6 +4,13 @@ import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Zap, Mail, Lock, Building2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import { Button } from '../components/ui/Button';
+import { Input } from '../components/ui/Input';
+import { Zap, Mail, Lock, Building2 } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 export default function Signup() {
   const [email, setEmail] = useState('');
@@ -20,14 +27,19 @@ export default function Signup() {
     setError('');
 
     localStorage.removeItem('admin_bypass');
-    const { error } = await supabase.auth.signUp({
+    const { error: authError } = await supabase.auth.signUp({
       email,
       password,
       options: { data: { company_name: company } }
     });
 
-    if (error) setError(error.message);
-    else setSuccess(true);
+    if (authError) {
+      setError(authError.message);
+      toast.error(authError.message);
+    } else {
+      setSuccess(true);
+      toast.success('Registration successful! Check your email.');
+    }
     setLoading(false);
   };
 

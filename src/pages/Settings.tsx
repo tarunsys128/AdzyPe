@@ -5,6 +5,7 @@ import { Input } from '../components/ui/Input';
 import { Building2, Mail, Phone, MapPin, Briefcase, Trash2, AlertTriangle, Loader2, Save } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 export default function Settings() {
   const { user } = useAuth();
@@ -53,10 +54,10 @@ export default function Settings() {
     });
     
     if (!error) {
-      alert('Profile updated successfully!');
+      toast.success('Profile updated successfully!');
     } else {
       console.error('Save error:', error);
-      alert('Error saving profile: ' + error.message);
+      toast.error('Error saving profile: ' + error.message);
     }
     setSaving(false);
   };
@@ -68,14 +69,14 @@ export default function Settings() {
     try {
       const { error } = await supabase.rpc('reset_user_database');
       if (!error) {
-        alert('All data has been cleared. You are ready for a fresh start!');
-        window.location.reload();
+        toast.success('All data has been cleared.');
+        setTimeout(() => window.location.reload(), 1500);
       } else {
         throw error;
       }
     } catch (err: any) {
       console.error('Reset error:', err);
-      alert('Failed to reset data: ' + (err.message || 'Unknown error'));
+      toast.error('Failed to reset data: ' + (err.message || 'Unknown error'));
     } finally {
       setResetting(false);
     }

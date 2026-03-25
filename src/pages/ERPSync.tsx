@@ -4,6 +4,7 @@ import { syncTallyCustomers, syncTallyVouchers } from '../lib/tally';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { RefreshCw, CheckCircle2, Clock, Loader2, Terminal } from 'lucide-react';
+import toast from 'react-hot-toast';
 
 const SYNC_STEPS = [
   { id: 'connect',  label: 'Connecting to Tally Prime Server (Port 9000)...' },
@@ -70,6 +71,7 @@ export default function ERPSync() {
       setSyncStatus('success');
       setLastSync(new Date().toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }));
       addLog('[DONE] ERP Synchronization completed successfully.', 'success');
+      toast.success('ERP Synchronization completed successfully!');
 
     } catch (err: any) {
       console.error(err);

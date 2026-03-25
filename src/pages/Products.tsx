@@ -6,6 +6,7 @@ import { Chip } from '../components/ui/Badge';
 import { Package, Search, Plus, AlertTriangle, X, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
+import toast from 'react-hot-toast';
 
 const categories = ['All', 'FMCG', 'Beverages', 'Snacks', 'Dairy', 'Personal Care'];
 
@@ -58,10 +59,12 @@ export default function Products() {
     const { error } = await supabase.from('products').insert([productData]);
     
     if (!error) {
+      toast.success('Product added to inventory!');
       await fetchProducts();
       setNewProduct({ name: '', category: 'FMCG', price: '', stock: '', sku: '' });
       setShowAddForm(false);
     } else {
+      toast.error('Failed to add product: ' + error.message);
       console.error('Error adding product:', error);
     }
     setSubmitting(false);

@@ -6,8 +6,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { useInvoiceBuilder } from '../hooks/useInvoiceBuilder';
-import { ArrowLeft, Plus, Trash2, Eye, EyeOff, Zap, Building2, Calendar, Hash, Loader2 } from 'lucide-react';
+import { ArrowLeft, Plus, Trash2, Eye, EyeOff, Zap, Building2, Calendar, Hash } from 'lucide-react';
 import { formatCurrency } from '../lib/utils';
+import toast from 'react-hot-toast';
 
 export default function InvoiceForm() {
   const { user } = useAuth();
@@ -47,9 +48,17 @@ export default function InvoiceForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    if (!customerId) return setError('Please select a customer.');
+    
+    if (!customerId) {
+        setError('Please select a customer.');
+        toast.error('Please select a customer.');
+        return;
+    }
+    
     if (items.some(i => !i.name || i.price <= 0 || i.quantity <= 0)) {
-      return setError('Please fill all item details correctly.');
+       setError('Please fill all item details correctly.');
+       toast.error('Invalid item details. Please check price and quantity.');
+       return;
     }
 
     setLoading(true);
@@ -65,6 +74,7 @@ export default function InvoiceForm() {
 
     if (invError) { 
       setError(invError.message); 
+      toast.error('Failed to create invoice: ' + invError.message);
       setLoading(false); 
       return; 
     }
@@ -80,7 +90,9 @@ export default function InvoiceForm() {
     
     if (itemsError) {
       setError(itemsError.message);
+      toast.error('Failed to add items: ' + itemsError.message);
     } else {
+      toast.success('Invoice generated successfully!');
       navigate(`/invoices/${invoice.id}`);
     }
     setLoading(false);

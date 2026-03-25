@@ -18,9 +18,39 @@ import Products from './pages/Products';
 import Analytics from './pages/Analytics';
 import ERPSync from './pages/ERPSync';
 
+import { Toaster } from 'react-hot-toast';
+
 function App() {
   return (
-    <Routes>
+    <>
+      <Toaster 
+        position="bottom-center" 
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#0F172A',
+            color: '#fff',
+            borderRadius: '12px',
+            fontSize: '14px',
+            fontWeight: '600',
+            padding: '12px 20px',
+            boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)'
+          },
+          success: {
+            iconTheme: {
+              primary: '#10B981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#fff',
+            },
+          },
+        }} 
+      />
+      <Routes>
       <Route path="/login"  element={<Login />} />
       <Route path="/signup" element={<Signup />} />
 
@@ -43,7 +73,8 @@ function App() {
           <Route path="*"                  element={<Navigate to="/" replace />} />
         </Route>
       </Route>
-    </Routes>
+      </Routes>
+    </>
   );
 }
 
