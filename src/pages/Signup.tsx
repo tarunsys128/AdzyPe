@@ -4,12 +4,6 @@ import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { Zap, Mail, Lock, Building2 } from 'lucide-react';
-import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { Zap, Mail, Lock, Building2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Signup() {

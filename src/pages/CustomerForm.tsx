@@ -6,14 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card'
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
 import { ArrowLeft, UserPlus } from 'lucide-react';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-import { useAuth } from '../contexts/AuthContext';
-import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/Card';
-import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
-import { ArrowLeft, UserPlus } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function CustomerForm() {
