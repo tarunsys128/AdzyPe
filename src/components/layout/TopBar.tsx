@@ -94,15 +94,15 @@ export function TopBar() {
               <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20 group-hover:scale-105 transition-transform">
                 <User size={16} className="text-white" />
               </div>
-              <div className="text-left hidden sm:block">
+              <div className="text-left hidden sm:flex flex-col justify-center">
                 <p className="text-[11px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">
                   {profile?.business_name || 'Business User'}
                 </p>
-                <div className="flex items-center gap-1">
-                  <span className="text-xs font-bold text-slate-800 truncate max-w-[100px]">
-                    {user?.email?.split('@')[0] || 'Admin'}
-                  </span>
-                  <ChevronDown size={12} className={`text-slate-400 transition-transform ${showUser ? 'rotate-180' : ''}`} />
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <p className="text-xs font-bold text-slate-800 truncate leading-none">
+                    {user?.email?.split('@')[0] || 'admin'}
+                  </p>
+                  <ChevronDown size={14} className={`text-slate-400 transition-transform ${showUser ? 'rotate-180' : ''}`} />
                 </div>
               </div>
             </button>
