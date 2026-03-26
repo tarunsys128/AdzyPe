@@ -262,18 +262,16 @@ export default function InvoiceForm() {
                 <div className="bg-white rounded-xl shadow-xl ring-1 ring-slate-200/50 p-6 sm:p-10 min-h-[600px] text-slate-800 animate-fade-in relative overflow-hidden">
                   
                   {/* Subtle Background Mark for Realism */}
-                  <div className="absolute top-0 right-0 p-8 opacity-5">
-                    <Zap size={200} />
+                  <div className="absolute top-0 right-0 p-8 opacity-[0.03]">
+                    <img src="/logo.svg" className="w-[200px] h-[200px]" alt="Watermark" />
                   </div>
 
                   <div className="flex justify-between items-start mb-12 relative z-10">
                     <div>
                       <div className="flex items-center gap-2 mb-1.5">
-                        <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-                          <Zap size={14} className="text-white" />
-                        </div>
+                        <img src="/logo.svg" alt="Logo" className="w-7 h-7 rounded-lg" />
                         <span className="font-900 text-xl tracking-tight text-blue-700">
-                          {profile?.business_name || 'BizPay Pro'}
+                          {profile?.business_name || 'Jay Shree Traders'}
                         </span>
                       </div>
                       <p className="text-xs font-medium text-slate-500 whitespace-pre-line">
@@ -361,7 +359,7 @@ export default function InvoiceForm() {
 
                   <div className="mt-12 pt-6 border-t border-slate-100 text-center relative z-10">
                     <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Thank you for your business!</p>
-                    <p className="text-xs font-semibold text-slate-500">Generated securely by BizPay Pro Fintech</p>
+                    <p className="text-xs font-semibold text-slate-500">Generated securely by Jay Shree Traders</p>
                   </div>
                 </div>
               </div>

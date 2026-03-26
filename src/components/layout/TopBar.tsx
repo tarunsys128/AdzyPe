@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Bell, User, X, Zap } from 'lucide-react';
+import { Bell, User, X } from 'lucide-react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../contexts/AuthContext';
@@ -40,12 +40,10 @@ export function TopBar() {
 
         {/* Logo — shown ONLY on mobile (hidden on md+ because sidebar shows it) */}
         <NavLink to="/" className="flex items-center gap-2 md:hidden flex-shrink-0">
-          <div className="w-8 h-8 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/25">
-            <Zap size={16} className="text-white" strokeWidth={2.5} />
-          </div>
+          <img src="/logo.svg" alt="Jay Shree Traders" className="w-8 h-8 rounded-lg" />
           <div className="flex flex-col leading-none">
-            <span className="text-sm font-900 text-slate-800 tracking-tight">BizPay</span>
-            <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest">Pro</span>
+            <span className="text-sm font-900 text-slate-800 tracking-tight block truncate">Jay Shree Traders</span>
+            <span className="text-[9px] font-bold text-blue-600 uppercase tracking-widest block -mt-0.5">Business Suite</span>
           </div>
         </NavLink>
 

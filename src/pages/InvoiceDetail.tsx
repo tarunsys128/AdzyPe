@@ -80,7 +80,7 @@ export default function InvoiceDetail() {
                       <p className="text-sm font-bold text-slate-500 font-mono tracking-widest">INV-{invoice.id.substring(0,8)}</p>
                     </div>
                     <div className="text-right">
-                      <p className="font-900 text-xl tracking-tight text-slate-800 mb-1">BizPay Pro</p>
+                      <p className="font-900 text-xl tracking-tight text-slate-800 mb-1">Jay Shree Traders</p>
                       <p className="text-xs font-medium text-slate-500">123 Business Park, Mumbai, MH</p>
                     </div>
                   </div>

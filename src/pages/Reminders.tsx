@@ -22,7 +22,7 @@ function buildWhatsAppMessage(customer: CustomerLedger, businessName: string) {
     `💰 Outstanding Amount: ₹${customer.totalDue.toLocaleString('en-IN')}\n` +
     `📅 Due: ${customer.overdueDays > 0 ? `${customer.overdueDays} days overdue` : 'On time'}\n\n` +
     `Please clear your dues at the earliest to avoid late charges.\n\n` +
-    `For queries, contact us. Thank you! 🙏\n\nSent automatically via BizPay Pro.`
+    `For queries, contact us. Thank you! 🙏\n\nSent automatically via Jay Shree Traders.`
   );
 }
 
