@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Zap, Mail, Lock, Building2, CheckCircle2 } from 'lucide-react';
+import { Mail, Lock, Building2, CheckCircle2 } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Signup() {
@@ -86,9 +86,7 @@ export default function Signup() {
 
       <div className="w-full max-w-md animate-slide-up z-10 relative">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600 shadow-xl shadow-blue-500/20 mb-4">
-            <Zap size={28} className="text-white" strokeWidth={2.5} />
-          </div>
+          <img src="/logo.svg" alt="Jay Shree Traders" className="w-14 h-14 rounded-2xl mx-auto mb-4 shadow-xl shadow-blue-500/20" />
           <h1 className="text-2xl font-900 text-slate-800 tracking-tight">Create your account</h1>
           <p className="text-sm font-semibold text-slate-500 mt-2">Start managing your business for free</p>
         </div>

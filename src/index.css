@@ -39,7 +39,148 @@
     --radius-sm: 0.5rem;
     --radius-lg: 1.25rem;
   }
+
+  /* ── DARK MODE ── applies when <html class="dark"> */
+  .dark {
+    color-scheme: dark;
+
+    /* Backgrounds */
+    --bg:        15 23 42;     /* #0F172A */
+    --surface:   30 41 59;     /* #1E293B */
+    --surface-2: 51 65 85;     /* #334155 */
+    --surface-3: 71 85 105;    /* #475569 */
+
+    /* Text */
+    --text-primary:   248 250 252;  /* #F8FAFC */
+    --text-secondary: 203 213 225;  /* #CBD5E1 */
+    --text-muted:     148 163 184;  /* #94A3B8 */
+
+    /* Borders */
+    --border:        51 65 85;   /* #334155 */
+    --border-strong: 71 85 105;  /* #475569 */
+
+    /* Sidebar */
+    --sidebar-bg:     15 23 42;    /* Match app background */
+    --sidebar-border: 51 65 85;
+  }
+
+  /* Core resets for dark mode */
+  .dark body {
+    background-color: rgb(var(--bg)) !important;
+    color: rgb(var(--text-primary)) !important;
+  }
+
+  /* Universal Dark Mode Overrides for Tailwind Classes */
+  /* Backgrounds */
+  .dark .bg-white,
+  .dark .bg-slate-50,
+  .dark .bg-gray-50,
+  .dark .bg-zinc-50 {
+    background-color: rgb(var(--surface)) !important;
+  }
+  .dark .bg-slate-100,
+  .dark .bg-gray-100,
+  .dark .bg-zinc-100 {
+    background-color: rgb(var(--surface-2)) !important;
+  }
+
+  /* Borders */
+  .dark .border-slate-100,
+  .dark .border-slate-200,
+  .dark .border-gray-100,
+  .dark .border-gray-200,
+  .dark .border-zinc-100,
+  .dark .border-zinc-200,
+  .dark .border-border,
+  .dark .border-t,
+  .dark .border-b,
+  .dark .border-l,
+  .dark .border-r,
+  .dark .border {
+    border-color: rgb(var(--border)) !important;
+  }
+
+  /* Text Colors */
+  .dark .text-slate-800,
+  .dark .text-slate-900,
+  .dark .text-gray-800,
+  .dark .text-gray-900,
+  .dark .text-zinc-800,
+  .dark .text-zinc-900 {
+    color: rgb(var(--text-primary)) !important;
+  }
+  .dark .text-slate-600,
+  .dark .text-slate-700,
+  .dark .text-gray-600,
+  .dark .text-gray-700,
+  .dark .text-zinc-600,
+  .dark .text-zinc-700 {
+    color: rgb(var(--text-secondary)) !important;
+  }
+  .dark .text-slate-400,
+  .dark .text-slate-500,
+  .dark .text-gray-400,
+  .dark .text-gray-500,
+  .dark .text-zinc-400,
+  .dark .text-zinc-500 {
+    color: rgb(var(--text-muted)) !important;
+  }
+
+  /* Form Elements */
+  .dark input,
+  .dark textarea,
+  .dark select {
+    background-color: rgb(var(--surface-2)) !important;
+    color: rgb(var(--text-primary)) !important;
+    border-color: rgb(var(--border-strong)) !important;
+  }
+  .dark input::placeholder,
+  .dark textarea::placeholder {
+    color: rgb(var(--text-muted)) !important;
+  }
+
+  /* specific component fixes */
+  .dark aside {
+    background-color: rgb(var(--sidebar-bg)) !important;
+    border-color: rgb(var(--sidebar-border)) !important;
+  }
+  .dark nav.bg-white {
+    background-color: rgb(var(--surface)) !important;
+  }
+  .dark .glass-card,
+  .dark .card-base,
+  .dark .glass {
+    background-color: rgb(var(--surface)) !important;
+    border-color: rgb(var(--border)) !important;
+  }
+
+  /* Hover states for generic buttons/items */
+  .dark .hover\:bg-slate-50:hover,
+  .dark .hover\:bg-slate-100:hover,
+  .dark .group:hover .group-hover\:bg-slate-50 {
+    background-color: rgb(var(--surface-3)) !important;
+  }
+
+  /* Bottom Nav drawer */
+  .dark .md\:hidden.fixed.bottom-20 .bg-white {
+    background-color: rgb(var(--surface)) !important;
+    border-color: rgb(var(--border)) !important;
+  }
+
+  /* Tables */
+  .dark table th {
+    background-color: rgb(var(--surface-2)) !important;
+    color: rgb(var(--text-secondary)) !important;
+    border-bottom-color: rgb(var(--border-strong)) !important;
+  }
+  .dark table td {
+    border-bottom-color: rgb(var(--border)) !important;
+  }
+  .dark tbody tr:hover {
+    background-color: rgb(var(--surface-2)) !important;
+  }
 }
+
 
 @layer base {
   * {

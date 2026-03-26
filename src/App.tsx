@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Products from './pages/Products';
 import Analytics from './pages/Analytics';
 import ERPSync from './pages/ERPSync';
+import ImportExport from './pages/ImportExport';
 
 import { Toaster } from 'react-hot-toast';
 
@@ -69,6 +70,7 @@ function App() {
           <Route path="/products"          element={<Products />} />
           <Route path="/analytics"         element={<Analytics />} />
           <Route path="/erp-sync"          element={<ERPSync />} />
+          <Route path="/import-export"      element={<ImportExport />} />
           <Route path="/settings"          element={<Settings />} />
           <Route path="*"                  element={<Navigate to="/" replace />} />
         </Route>

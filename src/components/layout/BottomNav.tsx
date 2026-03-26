@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, NavLink } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, CreditCard, Users, Plus,
-  MoreHorizontal, Package, BarChart3, RefreshCw, Bell, Settings, X
+  MoreHorizontal, Package, BarChart3, RefreshCw, Bell, Settings, X, ArrowUpDown
 } from 'lucide-react';
 
 const mainNav = [
@@ -12,12 +12,13 @@ const mainNav = [
 ];
 
 const moreItems = [
-  { to: '/customers', icon: Users,     label: 'Customers', color: 'text-indigo-600',  bg: 'bg-indigo-50' },
-  { to: '/products',  icon: Package,   label: 'Products',  color: 'text-blue-600',    bg: 'bg-blue-50' },
-  { to: '/analytics', icon: BarChart3, label: 'Analytics', color: 'text-violet-600',  bg: 'bg-violet-50' },
-  { to: '/erp-sync',  icon: RefreshCw, label: 'ERP Sync',  color: 'text-emerald-600', bg: 'bg-emerald-50' },
-  { to: '/reminders', icon: Bell,      label: 'Reminders', color: 'text-amber-600',   bg: 'bg-amber-50' },
-  { to: '/settings',  icon: Settings,  label: 'Settings',  color: 'text-slate-600',   bg: 'bg-slate-100' },
+  { to: '/customers',     icon: Users,        label: 'Customers',     color: 'text-indigo-600',  bg: 'bg-indigo-50' },
+  { to: '/products',      icon: Package,      label: 'Products',      color: 'text-blue-600',    bg: 'bg-blue-50' },
+  { to: '/analytics',     icon: BarChart3,    label: 'Analytics',     color: 'text-violet-600',  bg: 'bg-violet-50' },
+  { to: '/erp-sync',      icon: RefreshCw,    label: 'ERP Sync',      color: 'text-emerald-600', bg: 'bg-emerald-50' },
+  { to: '/import-export', icon: ArrowUpDown,  label: 'Import/Export', color: 'text-cyan-600',    bg: 'bg-cyan-50' },
+  { to: '/reminders',     icon: Bell,         label: 'Reminders',     color: 'text-amber-600',   bg: 'bg-amber-50' },
+  { to: '/settings',      icon: Settings,     label: 'Settings',      color: 'text-slate-600',   bg: 'bg-slate-100' },
 ];
 
 export function BottomNav() {

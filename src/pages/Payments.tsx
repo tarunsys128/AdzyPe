@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { formatCurrency } from '../lib/utils';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
+import { DeleteDialog } from '../components/ui/DeleteDialog';
 import { Plus, Search, Wallet, CheckCircle2, Loader2 } from 'lucide-react';
 
 export default function Payments() {
@@ -45,6 +46,11 @@ export default function Payments() {
       setPayments(data);
     }
     setLoading(false);
+  }
+
+  async function deletePayment(id: string) {
+    await supabase.from('payments').delete().eq('id', id);
+    setPayments(prev => prev.filter(p => p.id !== id));
   }
 
   const filtered = payments.filter(p => {
@@ -105,11 +111,17 @@ export default function Payments() {
                   <div className="w-10 h-10 rounded-xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-600 flex-shrink-0">
                     <Wallet size={18} strokeWidth={2.5} />
                   </div>
-                  <div className="text-right min-w-0">
-                    <p className="text-lg font-900 text-emerald-600 tracking-tight">+{formatCurrency(payment.amount)}</p>
-                    <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
-                      {payment.payment_method || 'Manual'}
-                    </p>
+                  <div className="flex items-center gap-2">
+                    <div className="text-right min-w-0">
+                      <p className="text-lg font-900 text-emerald-600 tracking-tight">+{formatCurrency(payment.amount)}</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-wider mt-0.5">
+                        {payment.payment_method || 'Manual'}
+                      </p>
+                    </div>
+                    <DeleteDialog
+                      itemLabel={`Payment of ${formatCurrency(payment.amount)}`}
+                      onConfirm={() => deletePayment(payment.id)}
+                    />
                   </div>
                 </div>
 

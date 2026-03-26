@@ -6,6 +6,7 @@ import { formatCurrency } from '../lib/utils';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/Badge';
+import { DeleteDialog } from '../components/ui/DeleteDialog';
 import { Plus, Search, FileText } from 'lucide-react';
 
 export default function Invoices() {
@@ -29,6 +30,12 @@ export default function Invoices() {
     }
     fetchInvoices();
   }, [user]);
+
+  async function deleteInvoice(id: string) {
+    await supabase.from('invoice_items').delete().eq('invoice_id', id);
+    await supabase.from('invoices').delete().eq('id', id);
+    setInvoices(prev => prev.filter(i => i.id !== id));
+  }
 
   const filtered = invoices.filter(i => 
     i.customers?.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -61,7 +68,7 @@ export default function Invoices() {
         {filtered.map(invoice => (
           <Card 
             key={invoice.id} 
-            className="hover:-translate-y-1 hover:shadow-lg cursor-pointer group"
+            className="hover:-translate-y-1 hover:shadow-lg cursor-pointer group relative"
             onClick={() => navigate(`/invoices/${invoice.id}`)}
           >
             <CardContent className="p-5">
@@ -69,9 +76,15 @@ export default function Invoices() {
                 <div className="w-10 h-10 rounded-xl bg-blue-50 border border-blue-100 flex items-center justify-center text-blue-600 shadow-sm group-hover:scale-110 transition-transform">
                   <FileText size={18} strokeWidth={2.5} />
                 </div>
-                <div className="text-right">
-                  <p className="text-lg font-900 text-slate-800 tracking-tight">{formatCurrency(invoice.total_amount)}</p>
-                  <p className="text-xs font-semibold text-slate-400 font-mono mt-0.5">{invoice.id.split('-')[0].substring(0, 8)}</p>
+                <div className="flex items-center gap-2">
+                  <div className="text-right">
+                    <p className="text-lg font-900 text-slate-800 tracking-tight">{formatCurrency(invoice.total_amount)}</p>
+                    <p className="text-xs font-semibold text-slate-400 font-mono mt-0.5">{invoice.id.split('-')[0].substring(0, 8)}</p>
+                  </div>
+                  <DeleteDialog
+                    itemLabel={`Invoice #${invoice.id.substring(0,8)}`}
+                    onConfirm={() => deleteInvoice(invoice.id)}
+                  />
                 </div>
               </div>
 

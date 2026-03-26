@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '../components/ui/Card';
 import { Button } from '../components/ui/Button';
 import { StatusBadge } from '../components/ui/Badge';
+import { DeleteDialog } from '../components/ui/DeleteDialog';
 import { Users, Plus, Search, Phone, MapPin, Loader2 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../contexts/AuthContext';
@@ -57,6 +58,11 @@ export default function Customers() {
     setLoading(false);
   }
 
+  async function deleteCustomer(id: string) {
+    await supabase.from('customers').delete().eq('id', id);
+    setCustomers(prev => prev.filter(c => c.id !== id));
+  }
+
   const filtered = customers.filter(c =>
     c.name.toLowerCase().includes(search.toLowerCase()) ||
     (c.city && c.city.toLowerCase().includes(search.toLowerCase())) ||
@@ -101,7 +107,7 @@ export default function Customers() {
         {filtered.map(customer => (
           <Card
             key={customer.id}
-            className="hover:-translate-y-1 hover:shadow-lg cursor-pointer group transition-all"
+            className="hover:-translate-y-1 hover:shadow-lg cursor-pointer group transition-all relative"
             onClick={() => navigate(`/customers/${customer.id}`)}
           >
             <CardContent className="p-5">
@@ -118,6 +124,10 @@ export default function Customers() {
                     </div>
                   </div>
                 </div>
+                <DeleteDialog
+                  itemLabel={customer.name}
+                  onConfirm={() => deleteCustomer(customer.id)}
+                />
               </div>
 
               <div className="mb-4">

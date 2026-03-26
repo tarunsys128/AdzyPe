@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { Button } from '../components/ui/Button';
 import { Input } from '../components/ui/Input';
-import { Zap, Mail, Lock, ArrowRight } from 'lucide-react';
+import { Mail, Lock, ArrowRight } from 'lucide-react';
 import toast from 'react-hot-toast';
 
 export default function Login() {
@@ -39,12 +39,9 @@ export default function Login() {
 
       <div className="w-full max-w-md animate-slide-up z-10 relative">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-blue-600 shadow-xl shadow-blue-500/20 mb-5 relative group cursor-pointer">
-            <div className="absolute inset-0 bg-gradient-to-tr from-blue-600 to-cyan-400 rounded-2xl" />
-            <Zap size={32} className="text-white relative z-10 group-hover:scale-110 transition-transform" strokeWidth={2.5} />
-          </div>
-          <h1 className="text-3xl font-900 text-slate-800 tracking-tight">BizPay Pro</h1>
-          <p className="text-sm font-semibold text-slate-500 mt-2">Smart Billing & ERP Sync CRM</p>
+          <img src="/logo.svg" alt="Jay Shree Traders" className="w-16 h-16 rounded-2xl mx-auto mb-5 shadow-xl shadow-blue-500/20" />
+          <h1 className="text-3xl font-900 text-slate-800 tracking-tight">Jay Shree Traders</h1>
+          <p className="text-sm font-semibold text-slate-500 mt-2">Business Suite</p>
         </div>
 
         <div className="bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">

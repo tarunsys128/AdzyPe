@@ -2,21 +2,22 @@ import { NavLink, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, FileText, CreditCard, Users, Package,
   BarChart3, RefreshCw, Bell, Settings, ChevronLeft, ChevronRight,
-  LogOut, Zap
+  LogOut, ArrowUpDown
 } from 'lucide-react';
 import { useState } from 'react';
 import { supabase } from '../../lib/supabase';
 
 const navItems = [
-  { to: '/',           icon: LayoutDashboard, label: 'Dashboard' },
-  { to: '/invoices',   icon: FileText,         label: 'Invoices' },
-  { to: '/payments',   icon: CreditCard,       label: 'Payments' },
-  { to: '/customers',  icon: Users,            label: 'Customers' },
-  { to: '/products',   icon: Package,          label: 'Products' },
-  { to: '/analytics',  icon: BarChart3,        label: 'Analytics' },
-  { to: '/erp-sync',   icon: RefreshCw,        label: 'ERP Sync' },
-  { to: '/reminders',  icon: Bell,             label: 'Reminders' },
-  { to: '/settings',   icon: Settings,         label: 'Settings' },
+  { to: '/',               icon: LayoutDashboard, label: 'Dashboard' },
+  { to: '/invoices',       icon: FileText,         label: 'Invoices' },
+  { to: '/payments',       icon: CreditCard,       label: 'Payments' },
+  { to: '/customers',      icon: Users,            label: 'Customers' },
+  { to: '/products',       icon: Package,          label: 'Products' },
+  { to: '/analytics',      icon: BarChart3,        label: 'Analytics' },
+  { to: '/erp-sync',       icon: RefreshCw,        label: 'ERP Sync' },
+  { to: '/import-export',  icon: ArrowUpDown,      label: 'Import/Export' },
+  { to: '/reminders',      icon: Bell,             label: 'Reminders' },
+  { to: '/settings',       icon: Settings,         label: 'Settings' },
 ];
 
 export function Sidebar() {
@@ -35,14 +36,16 @@ export function Sidebar() {
       }`}
     >
       {/* Logo */}
-      <div className={`flex items-center h-16 px-4 border-b border-slate-100 ${collapsed ? 'justify-center' : 'gap-3'}`}>
-        <div className="w-8 h-8 rounded-lg gradient-blue flex items-center justify-center flex-shrink-0 glow-blue">
-          <Zap className="w-4 h-4 text-white" />
-        </div>
+      <div className={`flex items-center h-16 px-4 border-b border-slate-200 dark:border-slate-700 ${collapsed ? 'justify-center' : 'gap-3'}`}>
+        <img
+          src="/logo.svg"
+          alt="Jay Shree Traders Logo"
+          className="w-8 h-8 rounded-lg flex-shrink-0"
+        />
         {!collapsed && (
-          <div>
-            <span className="text-sm font-bold text-slate-800 tracking-tight">BizPay</span>
-            <span className="block text-[10px] text-blue-600 -mt-0.5 leading-none font-semibold">Pro</span>
+          <div className="min-w-0">
+            <span className="text-[13px] font-bold text-slate-800 tracking-tight leading-tight block truncate">Jay Shree Traders</span>
+            <span className="block text-[10px] text-blue-600 font-semibold leading-tight">Business Suite</span>
           </div>
         )}
       </div>
